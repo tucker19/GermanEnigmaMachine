@@ -20,24 +20,16 @@ final :: Rotor -- rotor to determine the output letter
 final = [A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,SP]
 
 rotor1 :: SuperRotor -- SuperRotor with scrambled letter starting in the upper left corner of keyboard while going down and each column to the right after
-rotor1 = [(Q,A),(A,B),(Z,C),(W,D),(S,E),(X,F),(E,G),(D,H),(C,I),(R,J),(F,K),
-			(V,L),(T,M),(G,N),(B,O),(Y,P),(H,Q),(N,R),(U,S),(J,T),(M,U),(I,V),
-			(K,W),(O,X),(L,Y),(P,Z),(SP,SP)]
+rotor1 = [(Q,A),(A,B),(Z,C),(W,D),(S,E),(X,F),(E,G),(D,H),(C,I),(R,J),(F,K),(V,L),(T,M),(G,N),(B,O),(Y,P),(H,Q),(N,R),(U,S),(J,T),(M,U),(I,V),(K,W),(O,X),(L,Y),(P,Z),(SP,SP)]
 
 rotor2 :: SuperRotor -- SuperRotor with scrambled letter starting in the upper right corner of keyboard while going across left and ever row after that
-rotor2 = [(P,A),(O,B),(I,C),(U,D),(Y,E),(T,F),(R,G),(E,H),(W,I),(Q,J),(L,K),
-			(K,L),(J,M),(H,N),(G,O),(F,P),(D,Q),(S,R),(A,S),(M,T),(N,U),(B,V),
-			(V,W),(C,X),(X,Y),(Z,Z),(SP,SP)]
+rotor2 = [(P,A),(O,B),(I,C),(U,D),(Y,E),(T,F),(R,G),(E,H),(W,I),(Q,J),(L,K),(K,L),(J,M),(H,N),(G,O),(F,P),(D,Q),(S,R),(A,S),(M,T),(N,U),(B,V),(V,W),(C,X),(X,Y),(Z,Z),(SP,SP)]
 
 rotor3 :: SuperRotor -- SuperRotor with scrambled letter starting in the middle of keyboard while going down and each column to the right after
-rotor3 = [(Y,A),(G,B),(V,C),(T,D),(F,E),(C,F),(R,G),(D,H),(X,I),(E,J),(S,K),
-			(Z,L),(W,M),(A,N),(Q,O),(P,P),(L,Q),(O,R),(K,S),(M,T),(I,U),(J,V),
-			(N,W),(U,X),(H,Y),(B,Z),(SP,SP)]
+rotor3 = [(Y,A),(G,B),(V,C),(T,D),(F,E),(C,F),(R,G),(D,H),(X,I),(E,J),(S,K),(Z,L),(W,M),(A,N),(Q,O),(P,P),(L,Q),(O,R),(K,S),(M,T),(I,U),(J,V),(N,W),(U,X),(H,Y),(B,Z),(SP,SP)]
 
 reflector :: SuperRotor -- SuperRotor with scrambled letter +13 in the alphabet of the position
-reflector = [(O,A),(P,B),(Q,C),(R,D),(S,E),(T,F),(U,G),(V,H),(W,I),(X,J),(Y,K),
-				(Z,L),(A,M),(B,N),(C,O),(D,P),(E,Q),(F,R),(G,S),(H,T),(I,U),(J,V),
-				(K,W),(L,X),(M,Y),(N,Z),(SP,SP)]
+reflector = [(O,A),(P,B),(Q,C),(R,D),(S,E),(T,F),(U,G),(V,H),(W,I),(X,J),(Y,K),(Z,L),(A,M),(B,N),(C,O),(D,P),(E,Q),(F,R),(G,S),(H,T),(I,U),(J,V),(K,W),(L,X),(M,Y),(N,Z),(SP,SP)]
 
 runRotor :: Rotor->Letter->Letter -- function to take in rotor and letter, breaks input letter into a number and goes down the rotor that many spaces and outputs the letter there
 runRotor  r l = r !! (fromEnum l)
@@ -55,21 +47,13 @@ rotateSuperRotor (x:xs) = (xs ++ [x])
 
 convertChartoLetter :: Char->Letter -- function to change a character into new data type letter
 convertChartoLetter x = if isSpace x == True
-			then do -- if character is space it is a different area of the Char numbering sstem
-					let y = fromEnum x-6
-					toEnum y::Letter
-			else do -- Char numbering system for uppercase Chars is 'A' = 65 so thus must make it A = 0 and etc
-					let y = fromEnum x-65
-					toEnum y::Letter
+			then toEnum $ fromEnum x - 6::Letter -- if character is space it is a different area of the Char numbering sstem
+			else toEnum $ fromEnum x - 65::Letter -- Char numbering system for uppercase Chars is 'A' = 65 so thus must make it A = 0 and etc
 
 convertLettertoChar :: Letter->Char -- function to change new data type letter into character 
 convertLettertoChar x = if x == SP
-			then do -- if Letter is SP need to change back into space or ' '
-					let y = fromEnum x+6
-					toEnum y::Char
-			else do -- add 65 back to Letter to get Char
-					let y = fromEnum x+65
-					toEnum y::Char
+			then toEnum $ fromEnum x + 6::Char -- if Letter is SP need to change back into space or ' '
+			else toEnum $ fromEnum x + 65::Char -- add 65 back to Letter to get Char
 
 finalLetter :: Rotor->Letter->Letter -- function to get position of output letter in the rotor and output the letter of the value of that position
 finalLetter r1 l = case elemIndex l r1 of
@@ -83,13 +67,11 @@ flipRotor :: SuperRotor->SuperRotor
 flipRotor r = map swap r -- swap all entries in SuperRotor
 
 searchRotorLoop :: Rotor->Rotor->Letter->Letter -- take in unchanged rotor and rotated rotor with a letter
-searchRotorLoop r r' l = do 					-- get letter from head of rotor and check to see if that head and letter input match
-							let rl = head r' 	-- if they do output the final letter
-							case l == rl of		-- else rotate rotor and try again in next iteration
-								True->finalLetter r l
-								_->do
-									let r'' = rotateRotor r'
-									searchRotorLoop r r'' l
+searchRotorLoop r r' l = case l == head r'  of		-- get letter from head of rotor and check to see if that head and letter input match 
+								True  -> finalLetter r l
+								False -> do  				-- else rotate rotor and try again in next iteration
+											let r'' = rotateRotor r'
+											searchRotorLoop r r'' l
 
 searchRotor :: SuperRotor->Letter->Letter 	-- take in a SuperRotor and letter
 searchRotor sr l = do 						-- unzip SuperRotor into two seperate rotors
@@ -180,86 +162,28 @@ initSetting l sr = do
 									initSetting l sr' 
 
 encode :: String->String->String -- take in two strings and output a string
-encode str1 str2 = do
-					let a 		= map convertChartoLetter str1 -- convert the message into letter format
-					let b 		= map convertChartoLetter str2 -- convert key letters into letter format
-					let r1 		= initSetting (head b) rotor1 -- initial settings for rotors
-					let r2 		= initSetting (head (drop 1 b)) rotor2
-					let r3 		= initSetting (head (drop 2 b)) rotor3
-					let r3' 	= rotateSuperRotor r3 -- rotate rotor closest to reflector before ever running encrypt
-					let blah 	= encodeEnigmaLoop r1 r2 r3' reflector a [] 0 -- may need to change this function
-					map convertLettertoChar blah
+encode str1 str2 = map convertLettertoChar (encodeEnigmaLoop (initSetting (head (map convertChartoLetter str2)) rotor1) (initSetting (head (drop 1 (map convertChartoLetter str2))) rotor2) (rotateSuperRotor (initSetting (head (drop 2 (map convertChartoLetter str2))) rotor3)) reflector (map convertChartoLetter str1) [] 0) -- may need to change this function
 
 decode :: String->String->String -- take in two strings and output a string
-decode str1 str2 = do
-					let a 		= map convertChartoLetter str1 -- convert message into letter format
-					let b 		= map convertChartoLetter str2 -- convert key letters into letter form
-					let r1 		= initSetting (head b) rotor1 -- inital setting for rotors
-					let r2 		= initSetting (head (drop 1 b)) rotor2
-					let r3 		= initSetting (head (drop 2 b)) rotor3
-					let r3' 	= rotateSuperRotor r3 -- rotate rotor closest to reflector before ever running decrypt
-					let blah 	= decodeEnigmaLoop r1 r2 r3' reflector a [] 0 -- may need to change this function
-				 	map convertLettertoChar blah
+decode str1 str2 = map convertLettertoChar (decodeEnigmaLoop (initSetting (head (map convertChartoLetter str2)) rotor1) (initSetting (head (drop 1 (map convertChartoLetter str2))) rotor2) (rotateSuperRotor (initSetting (head (drop 2 (map convertChartoLetter str2))) rotor3)) reflector (map convertChartoLetter str1) [] 0)
 
 isAlphaLoop::String->String->String -- check to see if elements of a string are all char or spaces
-isAlphaLoop str1 str2 = case str1 of
-								[] -> str2
-								_  -> do
-										let l = head str1
-										case isAlpha l of
-											False 	-> case isSpace l of
-															True 	-> do
-																		let str1' = drop 1 str1
-																		let str2' = str2 ++ [l]
-																		isAlphaLoop str1' str2'
-															_		-> do
-																		let str1' = drop 1 str1
-																		isAlphaLoop str1' str2
-											_ 		-> do
-														let str1' = drop 1 str1
-														let str2' = str2 ++ [l]
-														isAlphaLoop str1' str2'
+isAlphaLoop [] str2	  = str2
+isAlphaLoop str1 str2 = do
+							let l = head str1
+							case isAlpha l of
+								False 	-> isAlphaLoop (drop 1 str1) str2
+								True 	-> isAlphaLoop (drop 1 str1) (str2 ++ [l])
 
 encodeDecode :: String->String->String->IO() -- get strings ready for encoding or decoding
 encodeDecode str1 str2 str3 = if or (map (head str1 ==) ['e','E','d','D'])
 								then if head str1 == 'e'|| head str1 == 'E'
-									 then do
-											let str2'	= isAlphaLoop str2 []
-											let str2''  = map toUpper str2
-											let str3'	= map toUpper str3
-											let str2''' = encode str2'' str3'
-											putStrLn ("Encoded message: " ++ str2''')
-									 else do
-											let str2'	= isAlphaLoop str2 []
-											let str2''  = map toUpper str2
-											let str3' 	= map toUpper str3
-											let str2''' = decode str2'' str3'
-											putStrLn ("Decoded message: " ++ str2''')
+									 then putStrLn ("Encoded message: " ++ (encode (map toUpper (isAlphaLoop str2 [])) (map toUpper str3)))
+									 else putStrLn ("Decoded message: " ++ (decode (map toUpper (isAlphaLoop str2 [])) (map toUpper str3)))
 								else do
 										putStrLn "Please enter encode or decode"
 										xs <- getLine
 										encodeDecode xs str2 str3
-
-check :: String->String->String->String->IO()
-check str1 str2 str3 str4 = do
-								if head str4 /= 'y' && head str4 /= 'n'
-								then do 
-										putStrLn "Please input yes or no."
-										yn <- getLine 
-										let yn' = map toLower yn
-										check str1 str2 str3 yn
-								else if head str4 == 'n'
-									 then 
-									 	loop str1 str2 str3 str4
-									 else do
-									 		putStrLn "Are you encoding or decoding?"
-											ende <- getLine
-											putStrLn "What is the message you are trying to encode or decode?"
-											ys <- getLine
-											putStrLn "What is the key letters?"
-											zs <- getLine
-											loop ende ys zs str4
-
 
 loop :: String->String->String->String->IO() -- wrapper loop
 loop str1 str2 str3 str4 = do
@@ -268,7 +192,7 @@ loop str1 str2 str3 str4 = do
 								putStrLn "Please input yes or no."
 								yn <- getLine 
 								let yn' = map toLower yn
-								loop str1 str2 str3 yn
+								loop str1 str2 str3 yn'
 						else if head str4 == 'n'
 							 then do
 							 		putStrLn "Thank you and goodbye"
@@ -282,11 +206,11 @@ loop str1 str2 str3 str4 = do
 										encodeDecode str1 str2 str3
 										putStrLn "Would you like to encode or decode again?"
 										xs <- getLine
-										let xs' = map toLower xs
-										if head xs /= 'y' && head xs /= 'n'
-										then
-											check str1 str2 str3 xs'
+										if head xs == 'n'
+										then 
+											return ()
 										else do
+												let xs' = map toLower xs
 												putStrLn "Are you encoding or decoding?"
 												ende <- getLine
 												putStrLn "What is the message you are trying to encode or decode?"
