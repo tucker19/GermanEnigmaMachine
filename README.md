@@ -1,4 +1,4 @@
-GermanEnigmaMachine
+German Enigma Machine
 ===================
 
 Haskell version of German Enigma Machine
